@@ -60,10 +60,10 @@ public class AquariumModule : MonoBehaviour
 
     private bool ResetButtonPressed()
     {
+        Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, ResetButton.transform);
+        ResetButton.AddInteractionPunch();
         if (!_moduleSolved)
         {
-            Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, ResetButton.transform);
-            ResetButton.AddInteractionPunch();
             _squareData = new int[_w * _h];
             UpdateVisuals();
         }
@@ -74,11 +74,11 @@ public class AquariumModule : MonoBehaviour
     {
         return delegate
         {
+            Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, squaresSelectables[square].transform);
+            squaresSelectables[square].AddInteractionPunch(.25f);
+
             if (_moduleSolved)
                 return false;
-
-            Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, squaresSelectables[square].transform);
-            squaresSelectables[square].AddInteractionPunch(.5f);
 
             _squareData[square] = (_squareData[square] + 1) % 3;
             UpdateVisuals();
