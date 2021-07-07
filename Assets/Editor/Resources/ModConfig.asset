@@ -14,10 +14,10 @@ MonoBehaviour:
   id: AquariumModule
   title: Aquarium
   author: Quinn Wuest & Timwi
-  description: 'Blub.
+  description: 'If there is magic on this planet, it is contained in water.
 
 
-    Module created by Quinn Wuest & Timwi.
+    Module created by JakkOfKlubs & Timwi.
 
 
     [url=http://ktane.timwi.de/PDF/Aquarium.pdf]Manual PDF[/url]
@@ -25,4 +25,4 @@ MonoBehaviour:
     [url=http://ktane.timwi.de/HTML/Aquarium.html]Manual HTML[/url]'
   version: 1.0
   outputFolder: build
-  previewImage: {fileID: 2800000, guid: bd5c1f4881f57d54481b44e4c8a7779a, type: 3}
+  previewImage: {fileID: 2800000, guid: 9db5df044ec290d44b3df32c4f769124, type: 3}
