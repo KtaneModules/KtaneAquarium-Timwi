@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Aquarium;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -36,6 +37,7 @@ public class AquariumModule : MonoBehaviour
     const int _w = 6;
     const int _h = 6;
 
+    // 0 = unfilled; 1 = water; 2 = air
     private int[] _squareData = new int[_w * _h];
     private bool[] _solution;
 
@@ -479,16 +481,48 @@ public class AquariumModule : MonoBehaviour
     #endregion
 
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} ...";
+    private readonly string TwitchHelpMessage = @"!{0} water A1 A2 A3 [set cells to water] | !{0} air B3 B4 C4 [set cells to air] | !{0} reset D1 D2 [set cells to unfilled] | !{0} reset [reset the whole puzzle]";
 #pragma warning restore 414
 
     KMSelectable[] ProcessTwitchCommand(string command)
     {
+        Match m;
+        if ((m = Regex.Match(command, @"^\s*(?:(?<water>water|w)|(?<air>air|a)|reset|r)\s+([a-f][1-6]\s*)+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)).Success)
+        {
+            var coords = m.Groups[1].Captures.Cast<Capture>().Select(capture => coord(capture.Value.Trim())).ToArray();
+            if (coords.Any(c => c == null))
+                return null;
+            var desiredValue = m.Groups["water"].Success ? 1 : m.Groups["air"].Success ? 2 : 0;
+            return coords.SelectMany(c => Enumerable.Repeat(squaresSelectables[c.Value], (3 + desiredValue - _squareData[c.Value]) % 3)).ToArray();
+        }
+        else if (Regex.IsMatch(command, @"^\s*(reset|r)\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+            return new[] { ResetButton };
+
+        return null;
+    }
+
+    private int? coord(string unparsed)
+    {
+        if (unparsed.Length == 2 && "ABCDEFabcdef".Contains(unparsed[0]) && "123456".Contains(unparsed[1]))
+            return "ABCDEFabcdef".IndexOf(unparsed[0]) % 6 + 6 * "123456".IndexOf(unparsed[1]);
         return null;
     }
 
     IEnumerator TwitchHandleForcedSolve()
     {
-        yield return null;
+        if (_moduleSolved)
+            yield break;
+
+        for (var cell = 0; cell < 6 * 6; cell++)
+        {
+            while (_squareData[cell] != (_solution[cell] ? 1 : 2))
+            {
+                squaresSelectables[cell].OnInteract();
+                yield return new WaitForSeconds(.1f);
+            }
+        }
+
+        while (!_moduleSolved)
+            yield return true;
     }
 }
