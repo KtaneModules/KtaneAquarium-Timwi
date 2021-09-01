@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Aquarium;
-using JetBrains.Annotations;
 using UnityEngine;
 
 using Rnd = UnityEngine.Random;
 
 /// <summary>
 /// On the Subject of Aquarium
-/// Created by Quinn Wuest & Timwi
+/// Created by JakkOfKlubs & Timwi
 /// </summary>
 public class AquariumModule : MonoBehaviour
 {
@@ -481,7 +478,7 @@ public class AquariumModule : MonoBehaviour
     #endregion
 
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} water A1 A2 A3 [set cells to water] | !{0} air B3 B4 C4 [set cells to air] | !{0} reset D1 D2 [set cells to unfilled] | !{0} reset [reset the whole puzzle]";
+    private readonly string TwitchHelpMessage = @"!{0} water A1 A2 A3 [set cells to water] | !{0} air B3 B4 C4 [set cells to air] | !{0} reset D1 D2 [set cells to unfilled] | !{0} rest air/water [set unfilled cells to air or water] | !{0} solve ##..###.....# [solve whole puzzle; # = water, . = air]| !{0} reset [reset the whole puzzle]";
 #pragma warning restore 414
 
     KMSelectable[] ProcessTwitchCommand(string command)
@@ -495,8 +492,23 @@ public class AquariumModule : MonoBehaviour
             var desiredValue = m.Groups["water"].Success ? 1 : m.Groups["air"].Success ? 2 : 0;
             return coords.SelectMany(c => Enumerable.Repeat(squaresSelectables[c.Value], (3 + desiredValue - _squareData[c.Value]) % 3)).ToArray();
         }
-        else if (Regex.IsMatch(command, @"^\s*(reset|r)\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+
+        if (Regex.IsMatch(command, @"^\s*(reset|r)\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
             return new[] { ResetButton };
+
+        if ((m = Regex.Match(command, @"^\s*(?:rest|r)\s+(?:air|(?<w>water))\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)).Success)
+        {
+            var presses = _squareData.SelectIndexWhere(c => c == 0).Select(ix => squaresSelectables[ix]);
+            return m.Groups["w"].Success ? presses.ToArray() : presses.Concat(presses).ToArray();
+        }
+
+        if ((m = Regex.Match(command, @"^\s*(?:solve|s)\s+([\.#]{36})\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)).Success)
+        {
+            var btns = new List<KMSelectable>();
+            for (var i = 0; i < 36; i++)
+                btns.AddRange(Enumerable.Repeat(squaresSelectables[i], (3 + (m.Groups[1].Value[i] == '#' ? 1 : 2) - _squareData[i]) % 3));
+            return btns.ToArray();
+        }
 
         return null;
     }
