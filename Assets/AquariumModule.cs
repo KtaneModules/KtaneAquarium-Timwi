@@ -9,10 +9,11 @@ using UnityEngine;
 using Rnd = UnityEngine.Random;
 
 #pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable IDE1006 // Naming Styles
 
 /// <summary>
 /// On the Subject of Aquarium
-/// Created by JakkOfKlubs & Timwi
+/// Created by Quinn Wuest & Timwi
 /// </summary>
 public class AquariumModule : MonoBehaviour
 {
@@ -108,7 +109,7 @@ public class AquariumModule : MonoBehaviour
                         yield return xx + gridWidth * yy;
     }
 
-    public static bool[] GenerateContiguousRegion(int maxSize, bool[] forbidden)
+    private static RegionInfo GenerateContiguousRegion(int maxSize, bool[] forbidden)
     {
         var region = new bool[_w * _h];
         var allowed = forbidden.SelectIndexWhere(b => !b).ToArray();
@@ -124,12 +125,12 @@ public class AquariumModule : MonoBehaviour
                         if (!region[adj] && !forbidden[adj])
                             adjs.Add(adj);
             if (adjs.Count == 0)
-                return region;
+                return new RegionInfo(region);
             var adjsArr = adjs.ToArray();
             region[adjsArr[Rnd.Range(0, adjsArr.Length)]] = true;
             curSize++;
         }
-        return region;
+        return new RegionInfo(region);
     }
 
     struct RegionInfo
@@ -175,9 +176,9 @@ public class AquariumModule : MonoBehaviour
         while (numCovered < _w * _h)
         {
             var newRegion = GenerateContiguousRegion(Rnd.Range(0, 12), covered);
-            regions.Add(new RegionInfo(newRegion));
+            regions.Add(newRegion);
             for (var i = 0; i < _w * _h; i++)
-                if (newRegion[i])
+                if (newRegion.Region[i])
                 {
                     covered[i] = true;
                     numCovered++;
@@ -385,14 +386,11 @@ public class AquariumModule : MonoBehaviour
         return path.ToString();
     }
 
-    static CellDirection getDir(XY from, XY to)
-    {
-        return from.X == to.X
-            ? (from.Y > to.Y ? CellDirection.Up : CellDirection.Down)
-            : (from.X > to.X ? CellDirection.Left : CellDirection.Right);
-    }
+    static CellDirection getDir(XY from, XY to) => from.X == to.X
+        ? (from.Y > to.Y ? CellDirection.Up : CellDirection.Down)
+        : (from.X > to.X ? CellDirection.Left : CellDirection.Right);
 
-    static bool get(int[] cells, int w, int h, int x, int y) { return x >= 0 && x < w && y >= 0 && y < h && cells.Contains(x + w * y); }
+    static bool get(int[] cells, int w, int h, int x, int y) => x >= 0 && x < w && y >= 0 && y < h && cells.Contains(x + w * y);
 
     static XY[] tracePolygon(int[] cells, int w, int h, int i, int j, bool[][] visitedUpArrow)
     {
@@ -515,12 +513,9 @@ public class AquariumModule : MonoBehaviour
         return null;
     }
 
-    private int? coord(string unparsed)
-    {
-        if (unparsed.Length == 2 && "ABCDEFabcdef".Contains(unparsed[0]) && "123456".Contains(unparsed[1]))
-            return "ABCDEFabcdef".IndexOf(unparsed[0]) % 6 + 6 * "123456".IndexOf(unparsed[1]);
-        return null;
-    }
+    private int? coord(string unparsed) => unparsed.Length == 2 && "ABCDEFabcdef".Contains(unparsed[0]) && "123456".Contains(unparsed[1])
+        ? "ABCDEFabcdef".IndexOf(unparsed[0]) % 6 + 6 * "123456".IndexOf(unparsed[1])
+        : (int?) null;
 
     IEnumerator TwitchHandleForcedSolve()
     {
