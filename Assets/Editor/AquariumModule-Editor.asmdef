@@ -1,0 +1,10 @@
+{
+  "name": "AquariumModule-Editor",
+  "references": [
+    "AquariumModule"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}

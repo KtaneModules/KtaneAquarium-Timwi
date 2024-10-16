@@ -8,6 +8,8 @@ using UnityEngine;
 
 using Rnd = UnityEngine.Random;
 
+#pragma warning disable IDE0051 // Remove unused private members
+
 /// <summary>
 /// On the Subject of Aquarium
 /// Created by JakkOfKlubs & Timwi
@@ -239,12 +241,12 @@ public class AquariumModule : MonoBehaviour
         }
 
         // Generate SVG for logging
-        var horizLines = string.Format("<path d='{0}' stroke='black' stroke-width='.02' />", Enumerable.Range(1, _h - 1).Select(row => string.Format("M0 {0}h{1}", row, _w)).Join(""));
-        var vertLines = string.Format("<path d='{0}' stroke='black' stroke-width='.02' />", Enumerable.Range(1, _h - 1).Select(col => string.Format("M{0} 0v{1}", col, _h)).Join(""));
-        var outlines = regions.Select(rg => string.Format("<path d='{0}' stroke='black' stroke-width='.07' />", GenerateSvgPath(rg.Cells, _w, _h, 0, 0))).Join("");
-        var cluesSvg = requiredClues.Select(cl => string.Format("<text x='{0}' y='{1}' text-anchor='{2}' fill='black'>{3}</text>",
+        var horizLines = string.Format("<path class='aquarium-line' d='{0}' stroke-width='.02' />", Enumerable.Range(1, _h - 1).Select(row => string.Format("M0 {0}h{1}", row, _w)).Join(""));
+        var vertLines = string.Format("<path class='aquarium-line' d='{0}' stroke-width='.02' />", Enumerable.Range(1, _h - 1).Select(col => string.Format("M{0} 0v{1}", col, _h)).Join(""));
+        var outlines = regions.Select(rg => string.Format("<path class='aquarium-line' d='{0}' stroke-width='.07' />", GenerateSvgPath(rg.Cells, _w, _h, 0, 0))).Join("");
+        var cluesSvg = requiredClues.Select(cl => string.Format("<text class='aquarium-number' x='{0}' y='{1}' text-anchor='{2}'>{3}</text>",
             cl.IsRow ? _w + .2 : cl.Index + .5, cl.IsRow ? cl.Index + .7 : -.2, cl.IsRow ? "start" : "middle", cl.Clue)).Join("");
-        var blueSquares = Enumerable.Range(0, _w * _h).Select(cell => _solution[cell] ? string.Format("<rect x='{0}' y='{1}' width='1' height='1' fill='#005EFA' />", cell % _w, cell / _w) : "").Join("");
+        var blueSquares = Enumerable.Range(0, _w * _h).Select(cell => _solution[cell] ? string.Format("<rect class='aquarium-water' x='{0}' y='{1}' width='1' height='1' />", cell % _w, cell / _w) : "").Join("");
         var svg = string.Format("<svg viewBox='-.1 -1.1 {0} {1}' xmlns='http://www.w3.org/2000/svg' fill='none' font-size='1'>{2}{3}{4}{5}{6}</svg>", _w + 1.2, _h + 1.2, blueSquares, horizLines, vertLines, outlines, cluesSvg);
         Debug.LogFormat("[Aquarium #{0}]=svg[Solution:]{1}", _moduleId, svg);
     }
